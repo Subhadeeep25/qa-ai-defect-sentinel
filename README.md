@@ -136,7 +136,7 @@ qa-ai-defect-sentinel/
 
 ### 1. Installation
 ```bash
-git clone https://github.com/YOUR_USERNAME/qa-ai-defect-sentinel.git
+git clone https://github.com/Subhadeeep25/qa-ai-defect-sentinel.git
 cd qa-ai-defect-sentinel
 npm install
 ```
