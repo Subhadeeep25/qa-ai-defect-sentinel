@@ -1,0 +1,166 @@
+Suite,ID,Title,Precondition,Steps,Expected Result,Actual Result,Severity,Priority
+Functional,TC001,Verify page loads successfully,Browser open – URL accessible,1. Navigate to BuggyShop URL" | 2. Observe page,Page loads with header "BuggyShop" – product grid – search bar – cart section,Pass,High,High
+Functional,TC002,Verify all 6 products render on page load,Fresh page load,1. Open BuggyShop" | 2. Count product cards in grid,Exactly 6 product cards displayed,Pass,High,High
+Functional,TC003,Verify product names are displayed correctly,Products rendered,1. Observe each card's name,Names: iPhone 15 – Samsung S24 – MacBook Air – Gaming Mouse – Mechanical Keyboard – Sony Headphones,Pass,Medium,Medium
+Functional,TC004,Verify product prices are displayed correctly,Products rendered,1. Observe each card's price,Prices: Rs.70000 – Rs.65000 – Rs.98000 – Rs.1500 – Rs.3500 – Rs.6000,Pass,Medium,Medium
+Functional,TC005,Verify product stock levels are displayed,Products rendered,1. Observe each card's stock text,Stock: 5 – 0 – 2 – 10 – 4 – 3,Pass,Medium,Medium
+Functional,TC006,Verify product images are loaded,Products rendered – internet available,1. Observe images on cards,Each card shows an image from picsum.photos,Pass,Medium,Medium
+Functional,TC007,Verify Add to Cart button is present on every card,Products rendered,1. Check each product card,Every card has an Add to Cart button,Pass,High,High
+Functional,TC008,Verify clicking Add to Cart adds item to cart,Products rendered,1. Click Add to Cart on iPhone 15,iPhone 15 appears in the Shopping Cart section,Pass,High,High
+Functional,TC009,Verify cart count badge increments on add,Cart empty,1. Click Add to Cart on iPhone 15" | 2. Observe badge,Cart badge changes from 0 to 1,Pass,High,High
+Functional,TC010,Verify cart total updates after adding item,Cart empty,1. Click Add to Cart on Gaming Mouse (Rs.1500)" | 2. Observe total,Total = Rs.1400 (Rs.1500 - Rs.100 bug),DEFECT: Total incorrectly shows Rs.1400 instead of Rs.1500,High,High
+Functional,TC011,Verify cart shows all added items,Multiple items added,1. Add iPhone 15" | 2. Add MacBook Air,Both items appear in cart list,Pass,Medium,Medium
+Functional,TC012,Verify adding same product multiple times adds duplicates,Products rendered,1. Click Add to Cart on iPhone 15 twice,iPhone 15 appears twice in cart list,DEFECT: No quantity counter – duplicate entries not merged,Medium,Medium
+Functional,TC013,Verify search filters products by name,Products rendered,1. Type iPhone in search box" | 2. Observe grid,Only iPhone 15 card displayed,Pass,High,High
+Functional,TC014,Verify search is case-sensitive,Products rendered,1. Type iphone (lowercase) in search box" | 2. Observe grid,No products displayed,DEFECT: Search should be case-insensitive,Medium,Medium
+Functional,TC015,Verify empty search returns all products,Products rendered – previous search active,1. Type something in search" | 2. Clear search box to empty string" | 3. Observe grid,All 6 products reappear,Pass,High,High
+Functional,TC016,Verify cart initial state shows 0 items,Fresh page load,1. Open page" | 2. Check cart section,Cart shows empty – no items – total = Rs.0,Pass,High,High
+Functional,TC017,Verify total displays in Rupee format,Item added to cart,1. Add iPhone 15 (Rs.70000) to cart" | 2. Observe total,Total shows Rs.69900 (Rs.70000 - Rs.100 bug),DEFECT: Total miscalculated by Rs.100,High,High
+Functional,TC018,Verify cart persists while page is not refreshed,Item added to cart,1. Add item" | 2. Scroll away and back,Cart still shows the item,Pass,Low,Low
+Functional,TC019,Verify out-of-stock item has Add to Cart button,Products rendered,1. Observe Samsung S24 card,Add to Cart button is present and clickable,DEFECT: Button should be disabled for stock=0,Medium,Medium
+Functional,TC020,Verify out-of-stock item can be added to cart,Products rendered,1. Click Add to Cart on Samsung S24 (stock=0),Samsung S24 added to cart despite 0 stock,DEFECT: No stock validation,High,High
+Functional,TC021,Verify stock display when stock is 0,Products rendered,1. Observe Samsung S24 card,Shows Stock : 0 in gray text,Pass,Low,Low
+Functional,TC022,Verify header structure,Fresh page load,1. Observe header,Header shows BuggyShop on left – Cart : 0 with badge on right,Pass,Low,Low
+Functional,TC023,Verify footer text,Fresh page load,1. Scroll to bottom,Footer shows BuggyShop QA Practice Website,Pass,Low,Low
+Functional,TC024,Verify search input placeholder,Page loaded,1. Observe search input,Placeholder shows Search Products...,Pass,Low,Low
+Functional,TC025,Verify adding high-value item (MacBook Air),Page loaded,1. Add MacBook Air to cart" | 2. Check total,MacBook Air appears – Total = Rs.97900,DEFECT: Total off by Rs.100,Medium,Medium
+Functional,TC026,Verify adding low-value item (Gaming Mouse),Page loaded,1. Add Gaming Mouse to cart" | 2. Check total,Gaming Mouse appears – Total = Rs.1400,DEFECT: Total off by Rs.100,Medium,Medium
+Functional,TC027,Verify search with partial product name,Products rendered,1. Type Samsung in search" | 2. Observe,Samsung S24 card shown,Pass,Medium,Medium
+Functional,TC028,Verify search with single character,Products rendered,1. Type i in search" | 2. Observe,iPhone 15 card shown (name contains "i"),Pass,Low,Low
+Functional,TC029,Verify cart total with multiple items,Cart empty,1. Add Gaming Mouse (Rs.1500)" | 2. Add Keyboard (Rs.3500)" | 3. Check total,Total = Rs.4900 (Rs.1500+Rs.3500-Rs.100),DEFECT: Total = Rs.4900 instead of Rs.5000,High,High
+Functional,TC030,Verify cart total with three items,Cart empty,1. Add iPhone 15 (Rs.70000)" | 2. Add MacBook Air (Rs.98000)" | 3. Add Sony Headphones (Rs.6000)" | 4. Check total,Total = Rs.173900 (sum - Rs.100),DEFECT: Total = Rs.173900 instead of Rs.174000,High,High
+Functional,TC031,Verify search with numeric characters,Products rendered,1. Type 15 in search" | 2. Observe,iPhone 15 card displayed,Pass,Low,Low
+Functional,TC032,Verify search with trailing spaces,Products rendered,1. Type MacBook (with trailing space) in search" | 2. Observe,Trailing space may cause no match,DEFECT: No trim() on search input,Low,Low
+Functional,TC033,Verify search with leading spaces,Products rendered,1. Type " iPhone" (with leading space) in search" | 2. Observe,Leading space causes no match,DEFECT: No trim() on search input,Low,Low
+Functional,TC034,Verify search with special characters,Products rendered,1. Type @#$% in search" | 2. Observe,No products displayed – no error thrown,Pass,Low,Low
+Functional,TC035,Verify product card structure,Products rendered,1. Inspect a product card,Card contains: image – name – price – stock – Add to Cart button,Pass,Medium,Medium
+Functional,TC036,Verify sequential adding of multiple items,Page loaded,1. Add iPhone 15" | 2. Add Samsung S24" | 3. Add MacBook Air,All 3 items appear in cart list in order added,Pass,Medium,Medium
+Functional,TC037,Verify cart item order matches add order,Cart empty,1. Add Gaming Mouse first" | 2. Add Sony Headphones second,Gaming Mouse shown before Sony Headphones,Pass,Low,Low
+Functional,TC038,Verify cart section position,Page loaded,1. Scroll down,Cart section appears below product grid,Pass,Low,Low
+Functional,TC039,Verify keyup search triggers immediately,Products rendered,1. Type Keyboard quickly,Grid filters as you type on each keyup event,Pass,Medium,Medium
+Functional,TC040,Verify page title,Page loaded,1. Check browser tab title,Title is BuggyShop,Pass,Low,Low
+Negative,TC041,Verify adding out-of-stock item is blocked,Products rendered – Samsung S24 stock=0,1. Click Add to Cart on Samsung S24,Item should NOT be added – message "Out of stock",DEFECT: Item added successfully without validation,High,High
+Negative,TC042,Verify adding stock=0 item does not increase count,Samsung S24 visible,1. Click Add to Cart on Samsung S24" | 2. Check badge,Badge should remain unchanged,DEFECT: Badge increments despite zero stock,High,High
+Negative,TC043,Verify adding more than available stock,Page loaded,1. Add iPhone 15 (stock=5) to cart 10 times,Should limit to stock level or show error,DEFECT: No stock validation – all 10 added,Medium,Medium
+Negative,TC044,Verify adding item with invalid product ID,Page loaded,1. Call addToCart(999) via console,Graceful error handling – no crash,DEFECT: No error handling – product is undefined,Medium,Medium
+Negative,TC045,Verify search with null-like input,Page loaded,1. Type null in search,No products returned (no product named "null"),Pass,Low,Low
+Negative,TC046,Verify search with 1000+ character string,Page loaded,1. Paste 1000-character string in search,No crash – no products returned,Possible performance issue,Low,Low
+Negative,TC047,Verify search with script injection,Page loaded,1. Type <script>alert(1)</script> in search,No script execution – treated as literal text,Pass (used in .includes() not innerHTML),Medium,Medium
+Negative,TC048,Verify cart total with no items,Cart empty,1. Observe total when cart is empty,Total = Rs.0,Pass,High,High
+Negative,TC049,Verify rapid clicking of Add to Cart,Page loaded,1. Click Add to Cart on Gaming Mouse 20 times rapidly,20 entries added – no crash,DEFECT: No rate limiting or quantity checks,Low,Low
+Negative,TC050,Verify page with no internet,No internet,1. Disconnect internet" | 2. Reload page,Broken images – page structure intact,Pass (no alt text though),Medium,Medium
+Negative,TC051,Verify search does not affect cart,Cart has items,1. Add iPhone 15" | 2. Search Samsung" | 3. Check cart,Cart still contains iPhone 15 – only grid filtered,Pass,Medium,Medium
+Negative,TC052,Verify cart total with duplicate items,Cart empty,1. Add iPhone 15 twice" | 2. Add MacBook Air once,3 items – Total = 70000+70000+98000-100 = Rs.237900,DEFECT: No deduplication,Medium,Medium
+Negative,TC053,Verify page with JavaScript disabled,JS disabled,1. Reload page with JS off,Header – footer – CSS visible – no products rendered,Products rely on JS render(),High,High
+Negative,TC054,Verify adding negative price item via console,Console open,1. cart.push({id:999,name:Hack,price:-5000})" | 2. updateCart(),Negative total displayed: Rs.-5100,DEFECT: No price validation,Medium,Medium
+Negative,TC055,Verify zero-price item via console,Console open,1. cart.push({id:999,name:Free,price:0})" | 2. updateCart(),Total = Rs.-100 (0-100),DEFECT: Total subtracts Rs.100 from zero,Low,Low
+Negative,TC056,Verify adding same product 100 times,Page loaded,1. Add Gaming Mouse 100 times,100 entries – Total = 100*1500-100 = Rs.149900,DEFECT: No upper limit,Low,Low
+Negative,TC057,Verify empty string after non-empty search,Search with iPhone done,1. Clear search box" | 2. Observe grid,All products reappear,Pass,Medium,Medium
+Negative,TC058,Verify search with only spaces,Page loaded,1. Type 3 spaces in search,No products displayed,Pass,Low,Low
+Negative,TC059,Verify page at 200% zoom,Page loaded,1. Zoom browser to 200%,All elements visible and functional,Responsive grid likely okay,Low,Low
+Negative,TC060,Verify page at 25% zoom,Page loaded,1. Zoom browser to 25%,Elements remain readable and clickable,May be cramped,Low,Low
+Negative,TC061,Verify adding items at stock limit,Any product,1. Add iPhone 15 to cart 5 times (stock level),Should prevent or show quantity,DEFECT: No quantity tracking,Medium,Medium
+Negative,TC062,Verify cart badge with large count,Many items,1. Add 999 items to cart,Badge displays 999 within badge shape,OK for 3 digits – may overflow at 4+,Low,Low
+Negative,TC063,Verify search with single character no match,Page loaded,1. Type z in search,No products displayed – no error,Pass,Low,Low
+Negative,TC064,Verify adding item while search active,Search filtered to iPhone,1. Type iPhone" | 2. Click Add to Cart on visible card,Item added to cart normally,Pass,Medium,Medium
+Negative,TC065,Verify page with malformed URL,URL accessible,1. Append random query params,Page loads normally – no error,Pass,Low,Low
+Negative,TC066,Verify sequential add and search operations,Page loaded,1. Add iPhone 15" | 2. Search Keyboard" | 3. Add Keyboard" | 4. Clear search,Cart has 2 items – all 6 products shown,Pass,Medium,Medium
+Negative,TC067,Verify cart with only out-of-stock items,Page loaded,1. Add Samsung S24 to cart" | 2. Check cart,Cart has Samsung S24 with total calculated,DEFECT: Stock validation bypassed,Medium,Medium
+Negative,TC068,Verify button text consistency,Default locale,1. Observe all Add to Cart buttons,Text reads Add to Cart on all cards,Pass,Low,Low
+Negative,TC069,Verify no console errors,Console open,1. Add items – search – clear search,No JavaScript errors in console,Pass,Medium,Medium
+Negative,TC070,Verify cart total precision with large numbers,Cart empty,1. Add MacBook Air 100 times via console,Total = 9800000-100 = Rs.9799900,DEFECT: No stock limit – always -Rs.100,Low,Low
+Boundary,TC071,Verify adding minimum price item (Rs.1500),Cart empty,1. Add Gaming Mouse,Total = Rs.1400 (Rs.1500 - Rs.100),DEFECT: -Rs.100 applied incorrectly,Medium,Medium
+Boundary,TC072,Verify adding maximum price item (Rs.98000),Cart empty,1. Add MacBook Air,Total = Rs.97900 (Rs.98000 - Rs.100),DEFECT: -Rs.100 applied incorrectly,Medium,Medium
+Boundary,TC073,Verify cart with exactly 1 item,Cart empty,1. Add exactly 1 item,Count = 1 – one item displayed,Pass,Medium,Medium
+Boundary,TC074,Verify cart with 0 items (empty),Fresh load,1. Do not add anything,Count = 0 – no items – total = Rs.0,Pass,High,High
+Boundary,TC075,Verify search with exact product name match,Products rendered,1. Type iPhone 15,Only iPhone 15 displayed,Pass,Medium,Medium
+Boundary,TC076,Verify search with single-character match G,Products rendered,1. Type G,Gaming Mouse displayed,Pass,Low,Low
+Boundary,TC077,Verify adding item with stock level 1 (not possible by design),Products rendered,1. Add MacBook Air (stock=2) once,Should be allowed – stock unchanged,DEFECT: Stock never decreases,Low,Low
+Boundary,TC078,Verify stock display boundary stock=0,Samsung S24 card,1. Observe stock value,Shows Stock : 0,Pass,Low,Low
+Boundary,TC079,Verify stock display boundary stock=10,Gaming Mouse card,1. Observe stock value,Shows Stock : 10,Pass,Low,Low
+Boundary,TC080,Verify cart badge with 0 items,Fresh load,1. Observe badge,Shows 0,Pass,Medium,Medium
+Boundary,TC081,Verify cart badge with 1 item,1 item added,1. Add 1 item – observe badge,Shows 1,Pass,Medium,Medium
+Boundary,TC082,Verify cart badge at maximum,Continuous adding,1. Keep adding items,Badge displays count without breaking layout,Likely wraps at large numbers,Low,Low
+Boundary,TC083,Verify adding product with id=1 (minimum),Page loaded,1. Click Add to Cart on iPhone 15 (id=1),Added successfully,Pass,Low,Low
+Boundary,TC084,Verify adding product with id=6 (maximum),Page loaded,1. Click Add to Cart on Sony Headphones (id=6),Added successfully,Pass,Low,Low
+Boundary,TC085,Verify total with all 6 products (full catalog),Cart empty,1. Add all 6 products once each" | 2. Check total,Total = 244000-100 = Rs.243900,DEFECT: Expected Rs.244000,High,High
+UI,TC086,Verify page layout structure,Fresh load,1. Open page,Header at top – container in middle – footer at bottom,Pass,Medium,Medium
+UI,TC087,Verify header background color,Page loaded,1. Inspect header,Background: #1f2937 (dark gray),Pass,Low,Low
+UI,TC088,Verify header text color,Page loaded,1. Inspect header text,Color: white – font-size: 28px for BuggyShop,Pass,Low,Low
+UI,TC089,Verify cart badge style,Page loaded,1. Inspect .badge,Background: #ef4444 (red) – white text – border-radius: 20px,Pass,Low,Low
+UI,TC090,Verify search input style,Page loaded,1. Inspect search input,Width 100% – padding 12px – border-radius 8px – border 1px solid #ccc – font-size 16px,Pass,Medium,Medium
+UI,TC091,Verify product grid responsiveness,Any screen size,1. Resize browser width,Grid uses auto-fit minmax(240px 1fr) – cards reflow,Pass,High,High
+UI,TC092,Verify card hover effect,Products rendered,1. Hover over any product card,Card translates up 5px with 0.3s transition,Pass,Low,Low
+UI,TC093,Verify card image dimensions,Products rendered,1. Inspect card image,Width 100% – height 220px – object-fit cover,Pass,Low,Low
+UI,TC094,Verify card shadow styling,Products rendered,1. Inspect card,Box-shadow: 0 5px 15px rgba(0,0,0,.08) – border-radius: 12px,Pass,Low,Low
+UI,TC095,Verify price text styling,Products rendered,1. Inspect price element,Color: #2563eb (blue) – font-size: 20px – font-weight: bold,Pass,Low,Low
+UI,TC096,Verify stock text color,Products rendered,1. Inspect stock element,Color: gray,Pass,Low,Low
+UI,TC097,Verify button default styling,Products rendered,1. Inspect Add to Cart button,Background: #2563eb – text white – border-radius 8px – width 100% – padding 12px – font-size 15px,Pass,Medium,Medium
+UI,TC098,Verify button hover style,Products rendered,1. Hover over Add to Cart button,Background changes from #2563eb to #1d4ed8,Pass,Low,Low
+UI,TC099,Verify cart section styling,Products rendered,1. Inspect cart section,Background white – padding 20px – border-radius 12px – box-shadow – margin-top 40px,Pass,Low,Low
+UI,TC100,Verify cart item divider,Items in cart,1. Add 2 items – inspect cart items,Each item: padding 8px 0 – border-bottom 1px solid #eee,Pass,Low,Low
+UI,TC101,Verify total text color,Item in cart,1. Inspect total heading,Color: #2563eb – margin-top: 15px,Pass,Low,Low
+UI,TC102,Verify page background color,Page loaded,1. Inspect body,Background: #f4f6f9 (light gray-blue),Pass,Low,Low
+UI,TC103,Verify footer style,Page loaded,1. Inspect footer,Text-align center – color #777 – margin-top 60px – padding 20px,Pass,Low,Low
+UI,TC104,Verify emoji renders correctly,Page loaded,1. Observe shopping cart emoji before BuggyShop,Emoji displayed,Pass (depends on OS/browser),Low,Low
+UI,TC105,Verify responsive layout at 320px width,Page loaded,1. Set browser to 320px width,Single column grid – fits without horizontal scroll,Should work with auto-fit grid,High,Medium
+Accessibility,TC106,Verify lang attribute on html tag,Page loaded,1. Inspect html tag,lang=en set,Pass,Medium,Medium
+Accessibility,TC107,Verify images have alt attributes,Products rendered,1. Inspect img tags,Each image should have descriptive alt text,DEFECT: No alt attributes on any product images,High,High
+Accessibility,TC108,Verify search input has label,Page loaded,1. Inspect search input,Should have label or aria-label,DEFECT: No label tag – uses placeholder only,High,High
+Accessibility,TC109,Verify buttons have accessible names,Products rendered,1. Inspect Add to Cart buttons,Each button has accessible name Add to Cart,Pass,Medium,Medium
+Accessibility,TC110,Verify heading hierarchy,Page loaded,1. Check h1-h6 usage,Should start with h1 – uses h2 as highest,DEFECT: Missing h1 – starts with h2,High,Medium
+Accessibility,TC111,Verify color contrast (WCAG AA),Page loaded,1. Measure contrast of text,Price (#2563eb on white) and stock (gray) should meet 4.5:1 ratio,Gray stock text likely fails WCAG AA,Medium,Medium
+Accessibility,TC112,Verify keyboard navigability,Page loaded,1. Tab through all interactive elements,Search input and all buttons receive focus in order,Pass,High,High
+Accessibility,TC113,Verify cart count announced by screen reader,Page loaded,1. Use screen reader,Badge content should be announced on cart update,DEFECT: No aria-live region on cart count,Medium,Medium
+Accessibility,TC114,Verify focus indicator on buttons,Products rendered,1. Tab to Add to Cart button,Visible focus ring should appear,Unknown – no custom focus styles,Medium,Medium
+Accessibility,TC115,Verify page at 200% zoom,Page loaded,1. Zoom to 200% with Ctrl+,All content readable – no overlap – buttons clickable,Layout uses relative units – likely okay,Medium,Medium
+Accessibility,TC116,Verify semantic HTML landmarks,Page loaded,1. Inspect landmarks,header and footer present – no main nav or section,DEFECT: No main or section landmarks,Medium,Medium
+Accessibility,TC117,Verify cart section has heading,Cart section visible,1. Inspect cart heading,h2 Shopping Cart present,Pass,Low,Low
+Accessibility,TC118,Verify total is distinguishable,Cart with items,1. Inspect total text,Uses separate h2#total,Pass,Low,Low
+Accessibility,TC119,Verify no flashing content,Page loaded,1. Observe page for 10 seconds,No animated or auto-refreshing content,Pass,Low,Low
+Accessibility,TC120,Verify font size prevents mobile zoom,Page loaded,1. Check font sizes,Body default – inputs 16px – buttons 15px,Button 15px may cause iOS zoom on tap,Low,Low
+Cross-browser,TC121,Chrome (latest),Chrome installed,1. Open page in Chrome,All features work – layout correct,Target primary browser,High,High
+Cross-browser,TC122,Firefox (latest),Firefox installed,1. Open page in Firefox,Same as Chrome – CSS grid and JS work,Test CSS Grid support,High,High
+Cross-browser,TC123,Microsoft Edge (latest),Edge installed,1. Open page in Edge,Identical to Chrome (Chromium-based),Pass,High,High
+Cross-browser,TC124,Apple Safari (latest),Safari installed,1. Open page in Safari,Layout correct – check object-fit support,Safari supports CSS Grid,High,High
+Cross-browser,TC125,Android Chrome (mobile),Mobile emulation,1. Open on Android Chrome,Responsive layout – touch interactions work,Test touch events,High,Medium
+Cross-browser,TC126,iOS Safari (mobile),iOS emulation,1. Open on iPhone Safari,Responsive layout – no tap delays,Check 15px button font size,High,Medium
+Cross-browser,TC127,Chrome incognito,Chrome installed,1. Open in incognito,Same as normal – no localStorage dependencies,Pass,Low,Low
+Cross-browser,TC128,Functionality across browsers,Multiple browsers,1. Add item and search in each browser,Consistent functionality across browsers,Cross-browser JS compatibility,Medium,Medium
+Cross-browser,TC129,Electron/WebView context,WebView available,1. Test in WebView,Page should load and function,No server dependencies,Low,Low
+Cross-browser,TC130,Legacy browser (IE11),IE11 installed,1. Open in IE11,CSS Grid may not work – fallback needed,DEFECT: No IE11 support for CSS Grid,Medium,Low
+Performance,TC131,Initial page load time,Clean cache,1. Open with DevTools Network tab,DOMContentLoaded under 2s – Load under 3s,Depends on picsum.photos,Medium,Medium
+Performance,TC132,Add to Cart response time,Cart empty,1. Click Add to Cart,Cart updates instantly under 50ms JS execution,JS execution time,Medium,Medium
+Performance,TC133,Search response time,6 products rendered,1. Type in search box,Filter executes under 30ms (O(n) tiny dataset),JS execution time,Medium,Medium
+Performance,TC134,Rapid 50-item addition,Cart empty,1. Add same item 50 times quickly,No UI freeze – cart updates each time,UI responsiveness,Medium,Medium
+Performance,TC135,CPU throttled page (4x slowdown),DevTools CPU throttle,1. Reload with 4x CPU slowdown,Page should still be interactive,CPU usage,Low,Low
+Performance,TC136,Slow network (Slow 3G),DevTools network throttle,1. Reload with Slow 3G,Images load progressively – page functional before images,Time to interactive,Medium,Medium
+Performance,TC137,Memory after extended interaction,Clean session,1. Add/search/clear 50x,Memory should not grow unbounded,Heap size,Low,Low
+Performance,TC138,Render with 10000 cart items,Cart empty,1. Add 10000 items via console,updateCart() should handle large array,DOM update time,Low,Low
+Performance,TC139,Memory after 30 min idle,Page loaded,1. Leave open for 30 min,No memory leak – under 50MB heap,Memory retention,Low,Low
+Performance,TC140,Search with max dataset (6 items),All products visible,1. Type each product name sequentially,Each search completes immediately,Search latency,Low,Low
+Security,TC141,XSS via search input,Page loaded,1. Type <img src=x onerror=alert(1)> in search,No script execution – literal text only,Pass (used in .includes() not innerHTML),High,High
+Security,TC142,XSS via cart manipulation,Console open,1. cart.push({name:"<script>alert(1)</script>",price:100})" | 2. updateCart(),Script executed via innerHTML,DEFECT: innerHTML injection without sanitization,High,High
+Security,TC143,Sensitive data exposure,View source,1. Right-click View Page Source,No API keys or secrets exposed,Pass,Medium,Medium
+Security,TC144,Prototype pollution via console,Console open,1. Object.prototype.price=0" | 2. Add item,No unexpected behavior in cart,Unknown risk,Medium,Medium
+Security,TC145,Input length limit on search,Page loaded,1. Paste 5000 characters in search,Browser handles without crash,No maxlength attribute,Low,Low
+Security,TC146,DOM clobbering via product name,Console open,1. cart.push({name:"<div id=total>Hacked</div>",price:100})" | 2. updateCart(),innerHTML overwrites total element,DEFECT: innerHTML can overwrite DOM elements with matching IDs,High,High
+Security,TC147,Console modification of products array,Console open,1. products.pop() in console,Affects current session – refresh restores,Pass (refresh resets),Low,Low
+Security,TC148,No eval() or setTimeout(string),Source code review,1. Search for eval/setTimeout in app.js,No dynamic code execution found,Pass,High,High
+Security,TC149,Negative price manipulation,Console open,1. cart.push({name:Hack,price:-100000})" | 2. updateCart(),Negative total displayed,DEFECT: No price validation for negative values,Medium,Medium
+Security,TC150,No CSRF/SQLi risks (frontend only),Codebase review,1. Analyze for network calls,No fetch/XHR – CSRF and SQLi not applicable,Pass,High,High
+Regression,TC151,Product grid renders 6 items after code change,Rendering,After code modifications all 6 products must render with correct data,Functional,High,High
+Regression,TC152,Add to Cart function after code change,Cart,Clicking Add to Cart must add item and increment badge,Functional,High,High
+Regression,TC153,Search function after code change,Search,Typing in search must filter grid on keyup without errors,Functional,High,High
+Regression,TC154,Cart total after code change,Cart,Cart total must be sum of prices (known -Rs.100 bug stays unless fixed),Functional,High,High
+Regression,TC155,Layout structure after CSS changes,UI,Header – grid – cart – footer must maintain correct styling,Visual,Medium,Medium
+Smoke,TC156,Page loads without errors,Global,Open page – no console errors – title BuggyShop visible,Smoke,High,High
+Smoke,TC157,Products are displayed,Rendering,Product grid shows 6 cards with name/price/stock/image/button,Smoke,High,High
+Smoke,TC158,Add to Cart works,Cart,Click Add to Cart – item appears in cart – badge increments,Smoke,High,High
+Smoke,TC159,Search works,Search,Type in search – grid filters to matching products,Smoke,High,High
+Smoke,TC160,Cart total updates,Cart,After adding items total heading updates,Smoke,High,High
+Sanity,TC161,Product count is correct,Rendering,Exactly 6 product cards visible in grid,Sanity,High,High
+Sanity,TC162,Stock=0 product has Add button,UI,Samsung S24 shows Add to Cart button (known defect),Sanity,Medium,Medium
+Sanity,TC163,Cart starts empty on fresh load,Cart,No items – badge shows 0 – total shows Rs.0,Sanity,High,High
+Sanity,TC164,Search by out-of-stock product name,Search,Type Samsung – Samsung S24 card displayed,Sanity,Medium,Medium
+Sanity,TC165,Header displays correctly,UI,Header shows BuggyShop emoji + title on left,Sanity,Low,Low

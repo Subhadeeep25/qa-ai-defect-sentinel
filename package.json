@@ -1,0 +1,27 @@
+{
+  "name": "buggyshop-qa-automation",
+  "version": "1.0.0",
+  "description": "JavaScript Playwright automation framework with AI-assisted failure analysis for BuggyShop",
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:chrome": "npx playwright test --project=chromium",
+    "test:firefox": "npx playwright test --project=firefox",
+    "test:webkit": "npx playwright test --project=webkit",
+    "test:smoke": "npx playwright test --grep @smoke",
+    "test:sanity": "npx playwright test --grep @sanity",
+    "test:regression": "npx playwright test --grep @regression",
+    "test:parallel": "npx playwright test --workers=4",
+    "test:retry": "npx playwright test --retries=2",
+    "debug": "npx playwright test --debug",
+    "codegen": "npx playwright codegen"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "dotenv": "^16.5.0",
+    "winston": "^3.17.0",
+    "uuid": "^11.1.0",
+    "openai": "^4.91.0"
+  }
+}
