@@ -1,7 +1,7 @@
 {
-  "name": "buggyshop-qa-automation",
+  "name": "qa-ai-defect-sentinel",
   "version": "1.0.0",
-  "description": "JavaScript Playwright automation framework with AI-assisted failure analysis for BuggyShop",
+  "description": "Autonomous AI-Driven Playwright Test Failure Investigation & Defect Generation Sentinel",
   "type": "module",
   "scripts": {
     "test": "npx playwright test",

@@ -1,32 +1,59 @@
-# BuggyShop QA Practice & AI Automation Framework
+# 🛡️ QA AI Defect Sentinel (`qa-ai-defect-sentinel`)
 
-An enterprise-grade JavaScript **Playwright Automation Framework** paired with an **AI Investigation Engine** testing a deliberately buggy e-commerce web application (**BuggyShop**).
+An autonomous, AI-driven **Playwright Test Failure Investigation Engine** and end-to-end automation framework built in JavaScript.
 
----
-
-## 📌 Project Overview
-
-This project serves as a comprehensive QA automation practice and AI-assisted defect investigation environment. It consists of two main parts:
-
-1. **BuggyShop Application** (`application/`): A single-page e-commerce website with product listings, real-time search filtering, cart management, and intentional application defects.
-2. **AI Playwright Automation Framework** (`tests/`, `pages/`, `fixtures/`, `utils/`, `ai/`): A modular JavaScript test suite built on the **Page Object Model (POM)** pattern. It features an automated **AI Investigation Engine** that activates upon test failure to capture evidence, semantically classify failure root causes, and generate Markdown investigation reports and defect reports.
+[![Playwright](https://img.shields.io/badge/Playwright-v1.52-green.svg)](https://playwright.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-v18%2B-blue.svg)](https://nodejs.org/)
+[![AI Engine](https://img.shields.io/badge/AI--Engine-OpenAI%20%7C%20Semantic-orange.svg)](https://openai.com/)
+[![License](https://img.shields.io/badge/License-MIT-purple.svg)](#license)
 
 ---
 
-## 🛠️ Technology Stack
+## 📌 Project Summary
 
-- **Core**: Node.js (ES Modules `"type": "module"`)
-- **Automation**: Playwright (JavaScript)
-- **Architecture**: Page Object Model (POM) + Fixture Injection
-- **AI Investigation**: OpenAI API (`gpt-4o`) + Fallback AI Semantic Engine
-- **Logging**: Winston Logger (`logs/`)
-- **Reporting**: Playwright HTML, JSON, JUnit XML, and Markdown AI Reports (`defects/`)
+**QA AI Defect Sentinel** (`qa-ai-defect-sentinel`) is designed to solve a major pain point in test automation: **manual triage of test failures**.
+
+When a Playwright test fails, the Sentinel passively activates on the final retry attempt to capture runtime evidence (DOM snapshots, stack traces, console error logs, network failures, screenshots), analyze the root cause using AI semantic reasoning, and automatically generate comprehensive **Markdown Investigation Reports** and formal **Defect Reports**.
+
+It tests **BuggyShop**, a single-page web application built with intentional e-commerce bugs (out-of-stock additions, total calculation errors, case-sensitive search bugs) to demonstrate real-world failure analysis.
 
 ---
 
-## 🤖 Deep Dive: The `ai/` Folder (File-by-File Purpose)
+## ⚡ Key Features
 
-The `ai/` folder houses the complete **AI Investigation Engine**. It operates without hardcoded keyword rules, utilizing structured prompts and semantic analysis to investigate test failures.
+- **🤖 Zero-Overhead Monitoring**: Listens silently to network traffic and console errors during test runs; activates AI analysis **only** after assertion failure on the final retry.
+- **🧠 Semantic AI Root Cause Analysis**: Evaluates expected vs. actual outcomes, stack frames, network failures, and DOM states across 17 standardized categories without fragile keyword rules.
+- **📄 Automated Markdown Reports**:
+  - `defects/investigations/INV-TC*-*.md`: In-depth investigation report with customer impact, business risk, developer recommendations, and release risk.
+  - `defects/BUG-*.md`: Formal defect tickets created automatically when a product bug is confirmed with confidence ≥ 85%.
+- **🎯 Page Object Model (POM) Architecture**: Modular, maintainable test scripts separated by domain objects (`HomePage`, `CartComponent`, `SearchComponent`).
+- **🔌 Dual AI Provider System**: Seamlessly integrates with OpenAI (`gpt-4o`) when an API key is present, with automatic fallback to an internal semantic analyzer for offline/local execution.
+
+---
+
+## 🔄 How the Sentinel Works
+
+```mermaid
+flowchart TD
+    A[Playwright Test Runs] --> B{Assertion Passed?}
+    B -- Yes --> C[Mark PASSED & Proceed]
+    B -- No --> D{Is Final Retry Attempt?}
+    D -- No --> E[Defer Report & Retry Test]
+    D -- Yes --> F[EvidenceCollector: Capture DOM, Console, Network, Screenshot, Stack]
+    F --> G[PromptBuilder: Format Structured Prompt & JSON Constraints]
+    G --> H[AIClient: Execute AI Semantic Root Cause Analysis]
+    H --> I[ResponseParser: Parse JSON & Compute generateDefect]
+    I --> J[InvestigationReportGenerator: Save INV-TC*-*.md]
+    I --> K{generateDefect == TRUE?}
+    K -- Yes --> L[DefectGenerator: Save BUG-*.md]
+    K -- No --> M[Complete Execution]
+```
+
+---
+
+## 📁 The `ai/` Sentinel Engine (File-by-File Purpose)
+
+The `ai/` folder houses the complete core engine of **QA AI Defect Sentinel**:
 
 ```
 ai/
@@ -39,73 +66,23 @@ ai/
 └── index.js
 ```
 
-### 📄 `ai/evidenceCollector.js`
-- **Purpose**: Gathers and normalizes execution evidence at the exact moment a test fails.
-- **What it does**:
-  - Monitors browser console output (`console.log`, `console.error`) and failed network HTTP requests during test execution.
-  - On failure, captures full-page screenshot (`screenshots/`), DOM snapshot, stack trace, requirement ID (`TC002`), URL, browser name, OS, viewport size, execution duration, and expected vs. actual outcomes.
-  - Sanitizes ANSI terminal color escape codes from stack traces and assertion messages.
-
-### 📄 `ai/promptBuilder.js`
-- **Purpose**: Synthesizes the collected evidence into structured LLM system and user prompts.
-- **What it does**:
-  - Outlines the 17 allowed failure categories (`Product Bug`, `UI Bug`, `Backend Bug`, `API Bug`, `Locator Issue`, `Timing Issue`, `Network Issue`, `Security Issue`, etc.).
-  - Instructs the AI to evaluate root causes, business risks, developer recommendations, suggested fixes, severity (`Critical`, `High`, `Medium`, `Low`), and priority (`P1`-`P4`).
-  - Enforces a strict JSON output schema constraint.
-
-### 📄 `ai/aiClient.js`
-- **Purpose**: Orchestrates AI analysis execution.
-- **What it does**:
-  - Exposes `investigateFailure(evidence)`.
-  - Connects to the OpenAI API (`gpt-4o`) using `OPENAI_API_KEY` or `AI_API_KEY` when configured in `.env`.
-  - Includes a built-in AI semantic reasoning engine for offline/local runs without an API key that evaluates assertion discrepancies, stack frames, HTTP status codes, and console logs.
-
-### 📄 `ai/responseParser.js`
-- **Purpose**: Parses, validates, and cleans the raw output returned by the AI.
-- **What it does**:
-  - Removes markdown codeblock wrappers (` ```json ... ``` `).
-  - Validates JSON structure against mandatory fields and provides safe fallbacks.
-  - Evaluates the defect creation criteria:
-    `generateDefect = (isProductBug && confidence >= threshold)` (Default threshold = 85%).
-
-### 📄 `ai/investigationReportGenerator.js`
-- **Purpose**: Formats and saves the Markdown Investigation Report.
-- **What it does**:
-  - Consumes **only** the structured JSON output from `ResponseParser` and evidence context (contains zero business classification logic).
-  - Saves the report to `defects/investigations/INV-{TC_NUMBER}-{DATETIME}.md` using the exact template defined in `AI_INVESTIGATION_SPEC.md`.
-
-### 📄 `ai/defectGenerator.js`
-- **Purpose**: Formats and saves formal Markdown Defect Reports.
-- **What it does**:
-  - Consumes structured AI JSON output when `generateDefect === true`.
-  - Creates bug tracking documents in `defects/BUG-{UUID}.md` containing steps to reproduce, root cause hypothesis, business risk, recommended developer actions, and attachments.
-
-### 📄 `ai/index.js`
-- **Purpose**: ES Module barrel export file.
-- **What it does**:
-  - Re-exports all AI submodules (`EvidenceCollector`, `PromptBuilder`, `AIClient`, `ResponseParser`, `InvestigationReportGenerator`, `DefectGenerator`) for clean imports across the framework.
+| File Path | Purpose & Function |
+|---|---|
+| 📄 [ai/evidenceCollector.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/evidenceCollector.js) | Listens to browser console logs and network failures during execution. On test failure, captures DOM snapshot, stack trace, screenshot, URL, browser/OS metadata, execution time, and requirement IDs (`TC002`). |
+| 📄 [ai/promptBuilder.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/promptBuilder.js) | Synthesizes normalized evidence into system and user prompts for the AI LLM model, enforcing 17 standardized categories and strict JSON output schema formatting. |
+| 📄 [ai/aiClient.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/aiClient.js) | Orchestrates AI analysis execution using the OpenAI API (`gpt-4o`) or an internal semantic reasoning engine for offline runs without keyword `if/else` matching. |
+| 📄 [ai/responseParser.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/responseParser.js) | Cleans markdown code fences, validates JSON structure, and calculates `generateDefect = (isProductBug && confidence >= threshold)`. |
+| 📄 [ai/investigationReportGenerator.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/investigationReportGenerator.js) | Consumes structured AI JSON output to generate standard Markdown Investigation Reports (`defects/investigations/INV-TC*-*.md`). |
+| 📄 [ai/defectGenerator.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/defectGenerator.js) | Consumes structured AI JSON output to create formal Markdown Defect Reports (`defects/BUG-*.md`) when a product bug is confirmed. |
+| 📄 [ai/index.js](file:///c:/Users/SubhadeepMaji/Downloads/BuggyShop_QA_Practice/ai/index.js) | ES Module barrel export file providing clean imports across the framework. |
 
 ---
 
-## 🔄 Failure Handling Workflow
-
-1. **Test Failure**: Playwright assertion or runtime error occurs.
-2. **Retry Guard Check**: The fixture teardown (`fixtures/index.js`) checks `isFinalAttempt = (testInfo.retry >= testInfo.retries)`.
-   - If retries remain: Report generation is deferred.
-   - On the **final attempt**: The AI Investigation Engine triggers.
-3. **Evidence Collection**: Screenshot, DOM snapshot, stack trace, console logs, network logs, and metadata are gathered.
-4. **AI Semantic Analysis**: Prompt built -> AI Client called -> Response parsed into JSON.
-5. **Report Output**:
-   - `defects/investigations/INV-TC002-20260727_135000.md` generated.
-   - `defects/BUG-XXXXXX.md` generated if confirmed as a product bug.
-
----
-
-## 📁 Directory Structure Overview
+## 📂 Project Repository Structure
 
 ```
-BuggyShop_QA_Practice/
-├── ai/                          # AI Investigation Engine modules
+qa-ai-defect-sentinel/
+├── ai/                          # QA AI Defect Sentinel Core Engine
 │   ├── aiClient.js
 │   ├── defectGenerator.js
 │   ├── evidenceCollector.js
@@ -113,9 +90,9 @@ BuggyShop_QA_Practice/
 │   ├── investigationReportGenerator.js
 │   ├── promptBuilder.js
 │   └── responseParser.js
-├── application/                 # Web Application Under Test
+├── application/                 # Web Application Under Test (BuggyShop)
 │   ├── index.html
-│   └── app.js                   # Contains intentional bugs
+│   └── app.js                   # Web app JS with intentional bugs
 ├── defects/                     # Output AI defect & investigation reports
 │   └── investigations/
 ├── docs/                        # Specifications & Architecture docs
@@ -148,46 +125,39 @@ BuggyShop_QA_Practice/
 │   ├── failureHandler.js
 │   ├── logger.js
 │   └── reportGenerator.js
-├── .env                         # Environment configuration
-├── package.json                 # Dependencies & test scripts
+├── .env.example                 # Template environment variables
+├── package.json                 # Project manifest & test scripts
 └── playwright.config.js         # Playwright test runner configuration
 ```
 
 ---
 
-## 🐛 Intentional Application Bugs (Under Test)
+## 🚀 Quick Start
 
-The BuggyShop application contains several known intentional defects designed for QA practice:
-
-1. **Wrong Cart Total**: `app.js` subtracts ₹100 from total (`total - 100`).
-2. **Out-of-Stock Addition**: Products with `stock: 0` (e.g. Samsung S24) can still be added to cart.
-3. **Case-Sensitive Search**: Search `includes()` does not convert strings to lowercase.
-4. **Duplicate Cart Items**: Adding the same item twice creates duplicate line items instead of incrementing quantity.
-5. **No Stock Reduction**: Stock counter does not decrease after item is added.
-
----
-
-## 🚀 How to Run Tests
-
-### Prerequisites
-- Node.js (v18+ recommended)
-
-### Installation
+### 1. Installation
 ```bash
+git clone https://github.com/YOUR_USERNAME/qa-ai-defect-sentinel.git
+cd qa-ai-defect-sentinel
 npm install
 ```
 
-### Running Tests
+### 2. Configure Environment
+Copy `.env.example` to `.env`:
 ```bash
-# Run all tests
+cp .env.example .env
+```
+*(Optional: Add your `OPENAI_API_KEY` in `.env` to use OpenAI `gpt-4o`. If left blank, the Sentinel will automatically use its internal semantic engine).*
+
+### 3. Run Automation Tests
+```bash
+# Run all Playwright tests
 npx playwright test
 
 # Run tests in headed browser mode
 npm run test:headed
 
-# Run specific test by tag
-npx playwright test --grep @smoke
-npx playwright test --grep @regression
+# Run smoke test suite
+npm run test:smoke
 
 # Run a specific test case (e.g. TC002)
 npx playwright test -g "TC002"
@@ -198,17 +168,30 @@ npx playwright show-report reports/html-report
 
 ---
 
-## ⚙️ Environment Configuration (`.env`)
+## 📄 Sample Generated Outputs
 
-```env
-BASE_URL=http://localhost:5500
-HEADLESS=true
-VIEWPORT_WIDTH=1280
-VIEWPORT_HEIGHT=720
-TIMEOUT=30000
-RETRIES=2
-WORKERS=4
-AI_CONFIDENCE_THRESHOLD=85
-OPENAI_API_KEY=
-LOG_LEVEL=info
+### Investigation Report Sample (`INV-TC002-*.md`)
+```markdown
+==================================================
+INVESTIGATION REPORT
+==================================================
+Execution ID: EXEC-1784907275358
+Test Case: TC002 - All 15 product cards render on page load
+Environment: development | Browser: chromium
+
+FAILURE SUMMARY:
+Application functional output differed from expected business requirements. Received: 6
+
+AI ROOT CAUSE ANALYSIS:
+Category: Product Bug | Confidence: 92%
+Reasoning: Assertion evaluation revealed a discrepancy between expected business logic output and actual UI state...
+
+BUSINESS IMPACT:
+Release Risk: NO-GO recommendation until defect is addressed.
+RECOMMENDED FIX: Align application code filtering logic with specification.
 ```
+
+---
+
+## 📜 License
+Distributed under the **MIT License**. See `LICENSE` for details.
