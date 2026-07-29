@@ -65,6 +65,8 @@ export class AIClient {
     const failedNet = net.filter(r => r.status >= 400 || r.status === 0);
 
     // Analyze evidence semantically
+    const hasFailedLocator = evidence.failedLocator && evidence.failedLocator !== 'N/A'
+      && !actual.includes('Expected:') && !actual.includes('Received:');
     const hasAssertionMismatch = actual.includes('Received:') || actual.includes('expect(');
     const hasNetworkFailures = failedNet.length > 0;
     const hasConsoleErrors = logs.includes('TypeError') || logs.includes('ReferenceError') || logs.includes('[error]');
@@ -90,6 +92,16 @@ export class AIClient {
       suggestedFix = 'Ensure target HTTP endpoints are active, accessible, and returning HTTP 200 responses.';
       suggestedOwner = 'Backend Team';
       severity = 'High';
+      priority = 'P2';
+    } else if (hasFailedLocator) {
+      category = 'Automation Script Issue';
+      confidence = 85;
+      failureSummary = `Locator '${evidence.failedLocator}' failed to resolve — check selector or page structure.`;
+      reasoning = `Playwright reported a locator resolution failure for '${evidence.failedLocator}'. This indicates the selector does not match any element on the page, matches too many elements (strict mode violation), or the element is not in the DOM at interaction time. No Expected/Received assertion mismatch was detected, confirming the failure is at the locator level, not the business logic level.`;
+      recommendation = 'Verify that the page structure matches the selector. Use Playwright Codegen to capture up-to-date locators, or add waitForSelector/toBeVisible with appropriate timeouts.';
+      suggestedFix = `Update locator '${evidence.failedLocator}' to match current DOM structure, or add waiting strategy before interacting with it.`;
+      suggestedOwner = 'QA';
+      severity = 'Medium';
       priority = 'P2';
     } else if (isTimeout) {
       category = 'Timing Issue';
