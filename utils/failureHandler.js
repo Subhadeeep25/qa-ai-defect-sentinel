@@ -1,13 +1,16 @@
-import { AIClient, InvestigationReportGenerator, DefectGenerator } from '../ai/index.js';
+import { spawnSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { EvidenceCollector } from './evidenceCollector.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class FailureHandler {
   constructor(page, testInfo, evidenceCollector = null) {
     this.page = page;
     this.testInfo = testInfo;
     this.evidenceCollector = evidenceCollector;
-    this.aiClient = new AIClient({
-      threshold: parseInt(process.env.AI_CONFIDENCE_THRESHOLD || '85', 10),
-    });
+    this.threshold = parseInt(process.env.AI_CONFIDENCE_THRESHOLD || '85', 10);
   }
 
   async handleFailure(error) {
@@ -19,26 +22,43 @@ export class FailureHandler {
     if (this.evidenceCollector && typeof this.evidenceCollector.captureEvidence === 'function') {
       evidence = await this.evidenceCollector.captureEvidence(error);
     } else {
-      const { EvidenceCollector } = await import('../ai/evidenceCollector.js');
       const collector = new EvidenceCollector(this.page, this.testInfo);
       await collector.initialize();
       evidence = await collector.captureEvidence(error);
     }
 
-    // 2. AI Investigation Engine Analysis (No keyword if/else classification)
-    console.log(`[FailureHandler] Triggering AI Investigation Engine...`);
-    const analysis = await this.aiClient.investigateFailure(evidence);
+    // 2. Trigger Python AI Sentinel Engine
+    console.log(`[FailureHandler] Triggering Python AI Investigation Sentinel...`);
+    let analysis = null;
 
-    console.log(`[FailureHandler] AI Category: ${analysis.category} | Confidence: ${analysis.confidence}% | Severity: ${analysis.severity}`);
+    try {
+      const rootDir = path.resolve(__dirname, '..');
+      const pyProcess = spawnSync('python', ['-m', 'ai', `--threshold=${this.threshold}`], {
+        input: JSON.stringify(evidence),
+        encoding: 'utf-8',
+        cwd: rootDir,
+        maxBuffer: 10 * 1024 * 1024,
+      });
 
-    // 3. Generate Investigation Report (Consumes structured JSON)
-    const reportPath = InvestigationReportGenerator.generateReport(analysis, evidence);
-    console.log(`[FailureHandler] Investigation report generated: ${reportPath}`);
-
-    // 4. Generate Defect Report if applicable
-    if (analysis.generateDefect) {
-      const defectPath = DefectGenerator.generateDefect(analysis, evidence);
-      console.log(`[FailureHandler] Defect report generated: ${defectPath}`);
+      if (pyProcess.status === 0 && pyProcess.stdout) {
+        const pyResult = JSON.parse(pyProcess.stdout.trim());
+        if (pyResult.analysis) {
+          analysis = pyResult.analysis;
+          console.log(`[FailureHandler] Python AI Category: ${analysis.category} | Confidence: ${analysis.confidence}% | Severity: ${analysis.severity}`);
+          if (pyResult.investigationReport) {
+            console.log(`[FailureHandler] Investigation report generated: ${pyResult.investigationReport}`);
+          }
+          if (pyResult.defectReport) {
+            console.log(`[FailureHandler] Defect report generated: ${pyResult.defectReport}`);
+          }
+          return { analysis, evidence };
+        }
+      } else {
+        const errMsg = pyProcess.stderr || pyProcess.error?.message || 'Unknown Python process failure';
+        console.error(`[FailureHandler] Python AI engine error: ${errMsg}`);
+      }
+    } catch (pyErr) {
+      console.error(`[FailureHandler] Python invocation error: ${pyErr.message}`);
     }
 
     return { analysis, evidence };
