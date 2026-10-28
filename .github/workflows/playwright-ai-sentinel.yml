@@ -1,0 +1,118 @@
+name: Playwright AI Defect Sentinel CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  test-and-triage:
+    name: Run Playwright Tests & AI Sentinel Triage
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 🐍 Setup Python (for AI Sentinel Engine)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install Node dependencies
+        run: |
+          npm ci
+          # Install http-server to ensure webServer starts cleanly without prompts
+          npm install -D http-server
+
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: 🎭 Install Playwright Browsers with OS dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: 🚀 Run Playwright Tests with AI Sentinel
+        id: run_tests
+        continue-on-error: true # Ensures workflow continues to upload reports & triage summaries
+        run: npm test
+        env:
+          CI: true
+          BASE_URL: http://localhost:5500
+          RETRIES: 2
+          AI_CONFIDENCE_THRESHOLD: 85
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: 📊 Render AI Investigation & Defect Summary to GitHub Actions
+        if: always()
+        run: |
+          echo "## 🛡️ QA AI Defect Sentinel Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for generated formal defect reports
+          DEFECT_COUNT=$(ls -1 defects/BUG-*.md 2>/dev/null | wc -l)
+          INV_COUNT=$(ls -1 defects/investigations/INV-*.md 2>/dev/null | wc -l)
+          
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐛 Confirmed Product Bugs (BUG-*.md) | **$DEFECT_COUNT** |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Investigation Reports (INV-*.md) | **$INV_COUNT** |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$DEFECT_COUNT" -gt 0 ]; then
+            echo "### 🚨 Confirmed Defect Tickets" >> $GITHUB_STEP_SUMMARY
+            for file in defects/BUG-*.md; do
+              if [ -f "$file" ]; then
+                TITLE=$(head -n 1 "$file")
+                echo "<details><summary><b>$TITLE</b> (click to expand)</summary>" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                cat "$file" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                echo "</details>" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          fi
+
+      - name: 📤 Upload AI Defect & Investigation Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-defect-reports
+          path: defects/
+          retention-days: 14
+
+      - name: 📤 Upload Playwright HTML & Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-execution-reports
+          path: reports/
+          retention-days: 14
+
+      - name: 📤 Upload Failure Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: screenshots/
+          retention-days: 14
+
+      - name: 🏁 Final Build Status Check
+        if: always()
+        run: |
+          # If Playwright tests failed, fail the step so the GitHub build status reflects failure
+          if [ "${{ steps.run_tests.outcome }}" != "success" ]; then
+            echo "Playwright test suite completed with test failures. See AI Defect Sentinel summary above."
+            exit 1
+          fi
