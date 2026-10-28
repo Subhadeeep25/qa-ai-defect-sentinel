@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sys
 from typing import Any, Dict, Optional
 
@@ -118,11 +119,16 @@ class AIClient:
         test_name = evidence.get("testName", "test")
         url = evidence.get("url", "unknown")
 
+        # Extract clear test description without TCxxx / REQ-xxx prefix
+        test_desc = re.sub(r"^(?:TC\d+|REQ-\d+)\s*[-:]*\s*", "", test_name, flags=re.IGNORECASE).strip()
+        if not test_desc:
+            test_desc = test_name
+
         if has_network_failures:
             category = "Network Issue"
             confidence = 85
-            failure_summary = f"Network resource failure detected during test execution ({len(failed_net)} failed endpoints)."
-            failed_urls = ", ".join(n.get("url", "") for n in failed_net)
+            failed_urls = ", ".join(n.get("url", "") for n in failed_net[:2])
+            failure_summary = f"{test_desc}: Network failure on endpoint ({failed_urls})"
             reasoning = (
                 f"The execution evidence shows HTTP failure responses or network timeouts on endpoint calls: {failed_urls}. "
                 "This indicates a communication link or API server reachability issue rather than an element locator error."
@@ -139,7 +145,7 @@ class AIClient:
         elif has_failed_locator:
             category = "Automation Script Issue"
             confidence = 85
-            failure_summary = f"Locator '{failed_locator}' failed to resolve — check selector or page structure."
+            failure_summary = f"{test_desc}: Failed to resolve locator '{failed_locator}'"
             reasoning = (
                 f"Playwright reported a locator resolution failure for '{failed_locator}'. "
                 "This indicates the selector does not match any element on the page, matches too many elements (strict mode violation), "
@@ -159,7 +165,7 @@ class AIClient:
         elif is_timeout:
             category = "Timing Issue"
             confidence = 80
-            failure_summary = f"Execution timed out waiting for DOM condition or network state on page {url}."
+            failure_summary = f"{test_desc}: Timed out waiting for UI state on {url}"
             reasoning = (
                 "The stack trace and assertion log record a wait timeout. "
                 "The application took longer than expected to render required UI elements or settle pending requests."
@@ -176,9 +182,12 @@ class AIClient:
         elif has_console_errors:
             category = "Product Bug"
             confidence = 90
-            failure_summary = (
-                "Unhandled JavaScript runtime exception encountered in browser console."
+            err_line = next(
+                (line for line in console_logs if "error" in line.lower() or "exception" in line.lower()),
+                "JavaScript runtime exception",
             )
+            clean_err = re.sub(r"^\[.*?\]\s*", "", err_line).strip()
+            failure_summary = f"{test_desc}: Client runtime error ({clean_err})"
             reasoning = (
                 "Browser console logs captured uncaught client-side JavaScript runtime exceptions during page interaction. "
                 "This breaks client logic and prevents expected application behavior."
@@ -195,10 +204,17 @@ class AIClient:
         elif has_assertion_mismatch:
             category = "Product Bug"
             confidence = 92
-            failure_summary = f"Application functional output differed from expected business requirements. {actual}"
+            received_clean = re.sub(r"^Received:\s*", "", actual.strip(), flags=re.IGNORECASE).strip()
+            if expected and expected != "Specified test criteria to pass":
+                failure_summary = f"{test_desc}: Expected '{expected}', but got '{received_clean}'"
+            else:
+                failure_summary = f"{test_desc}: Assertion mismatch ({received_clean})"
+
             reasoning = (
-                "Assertion evaluation revealed a discrepancy between expected business logic output and actual UI state. "
-                "Playwright successfully located and queried target components, confirming elements exist but business calculation/filtering logic produced incorrect output."
+                f"Assertion evaluation in '{test_name}' revealed a discrepancy between expected business logic "
+                f"(Expected: {expected}) and actual application state ({actual}). Playwright successfully located "
+                "and queried target components, confirming elements exist but business calculation or filtering logic "
+                "produced incorrect output."
             )
             recommendation = (
                 f"Inspect functional implementation handlers in application code related to {test_name}."
@@ -212,7 +228,7 @@ class AIClient:
         else:
             category = "Automation Script Issue"
             confidence = 75
-            failure_summary = f"Automation test assertion did not pass expected criteria on {url}."
+            failure_summary = f"{test_desc}: Assertion failed ({actual.strip()})"
             reasoning = (
                 "General test assertion failure observed without runtime JS console errors or network dropouts. "
                 "The script expectations may require updating to match application changes."

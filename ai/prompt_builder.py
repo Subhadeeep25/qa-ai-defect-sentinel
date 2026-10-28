@@ -51,13 +51,14 @@ CRITICAL INSTRUCTIONS:
 - Select EXACTLY ONE category from the following allowed categories:
   {categories_str}
 - You MUST provide clear, logical reasoning explaining WHY the category was selected.
+- In "failureSummary", produce a clear, descriptive defect title that explains the exact bug and what failed (e.g., 'Out-of-stock Samsung S24 can be added to cart', 'Search is case-sensitive: Searching "iphone" yields 0 results', 'Cart total calculation discrepancy: Expected 1500 but got 1400'). NEVER use generic boilerplate phrases like "Application functional output differed from expected business requirements".
 - Output MUST be strictly valid JSON without any surrounding conversational text or markdown codeblock wrappers.
 
 REQUIRED JSON RESPONSE SCHEMA:
 {{
   "category": "<Must be one of the allowed categories>",
   "confidence": <integer between 0 and 100>,
-  "failureSummary": "<Clear business-language summary of what failed without merely repeating assertion string>",
+  "failureSummary": "<Descriptive bug title explaining the exact business issue and failed expectation>",
   "reasoning": "<In-depth technical and architectural explanation of why this category was selected>",
   "supportingEvidence": [
     "<Specific observation 1 from DOM/Console/Network/StackTrace>",
